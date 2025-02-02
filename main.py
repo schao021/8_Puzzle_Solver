@@ -1,7 +1,9 @@
+dimension = 3 # We can just change this to adjust from 3x3 to like a 4x4
+
 class Node:
     def __init__(self, state, parent=None, cost=0):
-        self.state = state
-        self.parent = parent
+        self.state = state # current list
+        self.parent = parent # can be used for backtracking if i need
         self.cost = cost  # cost to reach node g(n)
     def __str__(self):
         return f"State: {self.state}, Cost: {self.cost}"
@@ -9,6 +11,27 @@ class Node:
 def make_node(state, parent=None, cost=0):
     return Node(state, parent, cost)
 
+# Use this to find the blank space for every iteration
+def find_blank(state):
+    for row in range(dimension):
+        for col in range(dimension):
+            if state[row][col] == 0:
+                return row,col
+    print("Error, no blank space found")
+    return -1
+
+# Use the find blank to find the position where I can move left, right down up
+def find_directions(row,col):
+    possible_moves = []
+    if row < dimension - 1:
+        possible_moves.append("down")
+    if row > 0:
+        possible_moves.append("up")
+    if col < dimension - 1:
+        possible_moves.append("right")
+    if col > 0:
+        possible_moves.append("left")
+    return possible_moves # list out all the possible moves so i can expand the nodes later
 
 basic_puzzle = [[1,2,3],
                 [4,5,0],
@@ -61,9 +84,13 @@ def main():
     while valid_input == False:   
         select_puzzle = input("This is Simon's CS 170 8-Puzzle, please select 1 for a basic puzzle or 2 to create your own\n")
         if select_puzzle == '1': # Hard Coded initial State
-            print(basic_puzzle)
+            # print(basic_puzzle)
             valid_input = True
             initial_node = make_node(basic_puzzle)
+            # print(initial_node)
+            row,col = find_blank(initial_node.state)
+            pos_moves = find_directions(row,col)
+            print(pos_moves)
             # generic_search(initial_node)
         elif select_puzzle == '2': # User-Written Initial State
             custom_puzzle = create_puzzle()
