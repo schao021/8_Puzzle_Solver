@@ -1,3 +1,15 @@
+class Node:
+    def __init__(self, state, parent=None, cost=0):
+        self.state = state
+        self.parent = parent
+        self.cost = cost  # cost to reach node g(n)
+    def __str__(self):
+        return f"State: {self.state}, Cost: {self.cost}"
+
+def make_node(state, parent=None, cost=0):
+    return Node(state, parent, cost)
+
+
 basic_puzzle = [[1,2,3],
                 [4,5,0],
                 [7,8,6]] # should be able to move 6 up 1 and get the answer
@@ -20,6 +32,8 @@ def create_puzzle(): # Used to make custom puzzle
 
 # Uniform is A* with h(n) = 0, so f(n) = g(n) cumulative cost and expand the cheapest node
 # The two A* ones we use h(n) according to specific, so that means everything else I think should be the same
+# In A*, h(n) is number of misplaced tiles, g(b) is depth of node f(n) = g(n) + h(n), so we want to find the lowest depth
+
 # function general-search(problem, QUEUEING-FUNCTION)
 # nodes = MAKE-QUEUE(MAKE-NODE(problem.INITIAL-STATE))
 # loop do 
@@ -39,6 +53,9 @@ def create_puzzle(): # Used to make custom puzzle
 # 4. expand the children of the current node base on the actions(Left, right, up, down)
 # 5. Quering function to insert expanded node back into queue.
 
+# def generic_search(intiial_node,hueristic):
+
+
 def main():
     valid_input = False # while loop continues to ask user until correct input
     while valid_input == False:   
@@ -46,9 +63,13 @@ def main():
         if select_puzzle == '1': # Hard Coded initial State
             print(basic_puzzle)
             valid_input = True
+            initial_node = make_node(basic_puzzle)
+            # generic_search(initial_node)
         elif select_puzzle == '2': # User-Written Initial State
-            print(create_puzzle())
+            custom_puzzle = create_puzzle()
             valid_input = True
+            initial_node = make_node(custom_puzzle)
+            # generic_search(initial_node)
         else:
             print("Incorrect input, please select 1 or 2")
 
