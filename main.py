@@ -33,8 +33,9 @@ def find_directions(row,col):
         possible_moves.append("left")
     return possible_moves # list out all the possible moves so i can expand the nodes later
 
-def expand_node(state, possible_moves): # expand base on the direction, possible moves is list and state is the current, so we will make children
+def expand_node(node, possible_moves): # expand base on the direction, possible moves is list and state is the current, so we will make children, # change to node to access cost
     children = []
+    state = node.state
     # find the blank space first
     row,col = find_blank(state)
     for move in possible_moves:  # iterate through and find all possible moves in list like [up, down, left, right]
@@ -47,7 +48,8 @@ def expand_node(state, possible_moves): # expand base on the direction, possible
             new_state[row][col], new_state[row][col - 1] = new_state[row][col - 1], new_state[row][col]
         elif move == "right" and col < dimension - 1:
             new_state[row][col], new_state[row][col + 1] = new_state[row][col + 1], new_state[row][col]
-        children.append(new_state) # append the children after swapping the two
+        child_node = make_node(new_state, state, node.cost + 1) # Make a node so i can access the cost later and add 1 per iteration
+        children.append(child_node) # append the children after swapping the two
     return children # return the list so we have all the children
 
 basic_puzzle = [[1,2,3],
@@ -108,8 +110,9 @@ def main():
             row,col = find_blank(initial_node.state)
             pos_moves = find_directions(row,col)
             print(pos_moves)
-            children = expand_node(initial_node.state,pos_moves)
-            print(children)
+            children = expand_node(initial_node,pos_moves)
+            for child in children:
+                print(child)
             # generic_search(initial_node)
         elif select_puzzle == '2': # User-Written Initial State
             custom_puzzle = create_puzzle()
