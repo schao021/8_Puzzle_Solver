@@ -1,0 +1,22 @@
+# Uniform is A* with h(n) = 0, so f(n) = g(n) cumulative cost and expand the cheapest node
+# The two A* ones we use h(n) according to specific, so that means everything else I think should be the same
+# In A*, h(n) is number of misplaced tiles, g(b) is depth of node f(n) = g(n) + h(n), so we want to find the lowest depth
+
+# function general-search(problem, QUEUEING-FUNCTION)
+# nodes = MAKE-QUEUE(MAKE-NODE(problem.INITIAL-STATE))
+# loop do 
+# if EMPTY(nodes) then return "failure"
+#     node = REMOVE-FRONT(nodes)
+# if problem.GOAL-TEST(node.STATE) succeeds then return node
+#     nodes = QUEUEING- FUNCTION(nodes, EXPAND(node, problem.OPERATORS))
+# end
+
+# Priority Queue I think?
+# 1. We make initial node and put it into queue
+# 2. Loop, remove the front node from queue and expand it
+#  2a. If empty: no solution is found and return failure
+#  2b. if goal is found, goal state is found, return node with goal state,
+#  2c. Else, expand the current node and add its children to queue
+# 3. Have a goal_test to check whether or not current node = goal state
+# 4. expand the children of the current node base on the actions(Left, right, up, down)
+# 5. Quering function to insert expanded node back into queue.

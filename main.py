@@ -63,12 +63,13 @@ def expand_node(node, possible_moves): # expand base on the direction, possible 
             new_state[row][col], new_state[row][col - 1] = new_state[row][col - 1], new_state[row][col]
         elif move == "right" and col < dimension - 1:
             new_state[row][col], new_state[row][col + 1] = new_state[row][col + 1], new_state[row][col]
-        child_node = make_node(new_state, state, node.cost + 1) # Make a node so i can access the cost later and add 1 per iteration
+        child_node = make_node(new_state, node, node.cost + 1) # Make a node so i can access the cost later and add 1 per iteration
+        print(child_node)
         children.append(child_node) # append the children after swapping the two
     return children # return the list so we have all the children
 
-basic_puzzle = [[1,2,3],
-                [4,5,0],
+basic_puzzle = [[1,2,0],
+                [4,5,3],
                 [7,8,6]] # should be able to move 6 up 1 and get the answer
 
 test_puzzle2 = [[7,2,4],
@@ -79,9 +80,13 @@ example_puzzle_1 = [[4,1,2],
                     [5,3,0],
                     [7,8,6]]
 
-example_puzzle_2 = [[0,1,2],
-                    [3,4,5],
-                    [6,7,8]]
+example_puzzle_2 = [[1,5,2],
+                    [4,8,7],
+                    [6,3,0]]
+
+example_test = [[0,7,2],
+                [4,6,1],
+                [3,5,8]]
 
 eight_puzzle_goal_state = [[1,2,3],
                            [4,5,6],
@@ -99,28 +104,17 @@ def create_puzzle(): # Used to make custom puzzle
     custom_puzzle.append(row_3_puzzle)
     return custom_puzzle
 
-# Uniform is A* with h(n) = 0, so f(n) = g(n) cumulative cost and expand the cheapest node
-# The two A* ones we use h(n) according to specific, so that means everything else I think should be the same
-# In A*, h(n) is number of misplaced tiles, g(b) is depth of node f(n) = g(n) + h(n), so we want to find the lowest depth
-
-# function general-search(problem, QUEUEING-FUNCTION)
-# nodes = MAKE-QUEUE(MAKE-NODE(problem.INITIAL-STATE))
-# loop do 
-# if EMPTY(nodes) then return "failure"
-#     node = REMOVE-FRONT(nodes)
-# if problem.GOAL-TEST(node.STATE) succeeds then return node
-#     nodes = QUEUEING- FUNCTION(nodes, EXPAND(node, problem.OPERATORS))
-# end
-
-# Priority Queue I think?
-# 1. We make initial node and put it into queue
-# 2. Loop, remove the front node from queue and expand it
-#  2a. If empty: no solution is found and return failure
-#  2b. if goal is found, goal state is found, return node with goal state,
-#  2c. Else, expand the current node and add its children to queue
-# 3. Have a goal_test to check whether or not current node = goal state
-# 4. expand the children of the current node base on the actions(Left, right, up, down)
-# 5. Quering function to insert expanded node back into queue.
+def print_solution_path(node):
+    path = []
+    while node:
+        path.append(node.state)
+        node = node.parent
+    path.reverse()
+    print("\nSolution Path:")
+    for state in path:
+        for row in state:
+            print(row)
+        print("---")
 
 # Uniform Cost Search
 def generic_search(puzzle, goal_state, hueristic): # puzzle is the given problem?
@@ -135,9 +129,18 @@ def generic_search(puzzle, goal_state, hueristic): # puzzle is the given problem
     else:
         return "Failure, incorrect heuristic option. Must be 1, 2 or 3"
     visited = set() # I use this to store the visted so that I dont have repeat
+    nodes_expanded = 0
+    max_queue_size = 0 # Both for report
     while priority_queue:
+        max_queue_size = max(max_queue_size, len(priority_queue))  # Track the max queue size
         prio_value, cur_node = heapq.heappop(priority_queue) # Pop the node with lowest cost
-        if cur_node.state == eight_puzzle_goal_state: # See if the current node we popped is true
+        nodes_expanded += 1 # After we pop it, that means we expanded
+        if cur_node.state == goal_state: # See if the current node we popped is true
+            print("\nSolution Found")
+            print(f"Solution Depth: {cur_node.cost}")
+            print(f"Nodes Expanded: {nodes_expanded}")
+            print(f"Max Queue Size: {max_queue_size}")
+            print_solution_path(cur_node)
             return cur_node # return if the node is true
         
         visited.add(tuple(map(tuple, cur_node.state))) # Add the current node into visted
@@ -146,10 +149,15 @@ def generic_search(puzzle, goal_state, hueristic): # puzzle is the given problem
         possible_moves = find_directions(row, col)
         children = expand_node(cur_node, possible_moves)
         for child in children:
-            child_state_tuple = tuple(map(tuple, child.state)) # 
-            if child_state_tuple not in visited:
-                heapq.heappush(priority_queue, (child.cost, child))  # If we didn't visit it yet, push into heapq and so we don't run into it again
-                visited.add(child_state_tuple)
+            child_state_tuple = tuple(map(tuple, child.state))
+            if child_state_tuple not in visited:  # If we didn't visit it yet, push into heapq and so we don't run into it again
+                if hueristic == 1:
+                    heapq.heappush(priority_queue, (child.cost, child))
+                elif hueristic == 2:
+                    heapq.heappush(priority_queue, (child.cost + misplaced_tiles(child.state, goal_state), child))
+                elif hueristic == 3:
+                    heapq.heappush(priority_queue, ((child.cost + manhatten(child.state, goal_state)), child))
+                # visited.add(child_state_tuple)
     return "Failure, No Solution Found"
 
 def misplaced_tiles(initial_state, goal_state):
@@ -174,7 +182,7 @@ def manhatten(initial_state, goal_state):
                 row_dif = abs(row - goal_row)
                 col_dif = abs(col - goal_col)
                 cost += row_dif + col_dif # Find the row and column difference and add it up
-                print(row_dif+col_dif)
+    print(cost)
     return cost
 
 def main():
@@ -184,19 +192,19 @@ def main():
         if select_puzzle == '1': # Hard Coded initial State
             # print(basic_puzzle)
             valid_input = True
-            initial_node = make_node(test_puzzle2)
+            initial_node = make_node(example_test)
             # initial_node = make_node(example_puzzle_1)
             print(f"Initial State is: {initial_node.state}")
             print(f"Goal State is: {eight_puzzle_goal_state}")
             # print(f"Misplaced Tiles: {misplaced_tiles(initial_node.state, eight_puzzle_goal_state)}")
-            print(f"Manhatten Total: {manhatten(initial_node.state, example_puzzle_2)}")
+            # print(f"Manhatten Total: {manhatten(initial_node.state, eight_puzzle_goal_state)}")
             # row,col = find_blank(initial_node.state)
             # pos_moves = find_directions(row,col)
             # print(pos_moves)
             # children = expand_node(initial_node,pos_moves)
             # for child in children:
             #     print(child)
-            final_node = generic_search(initial_node.state, example_puzzle_2, 3)
+            final_node = generic_search(initial_node.state, eight_puzzle_goal_state, 3)
             print(final_node)
             # print(f"This is the initial node {initial_node}")
             # print(f"This is the final node {final_node}")
