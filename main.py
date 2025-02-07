@@ -128,6 +128,15 @@ def uniform_cost(puzzle,hueristic): # puzzle is the given problem?
                 visited.add(child_state_tuple)
     return "Failure, No Solution Found"
 
+def misplaced_tiles(initial_state, goal_state):
+    count = 0
+    for i in range(dimension):
+        for j in range(dimension):
+            initial_tile = initial_state[i][j]
+            goal_tile = goal_state[i][j]
+            if initial_tile != goal_tile:
+                count += 1
+    return count
 
 def main():
     valid_input = False # while loop continues to ask user until correct input
@@ -136,18 +145,20 @@ def main():
         if select_puzzle == '1': # Hard Coded initial State
             # print(basic_puzzle)
             valid_input = True
-            # initial_node = make_node(basic_puzzle)
-            initial_node = make_node(example_puzzle_1)
-            # print(initial_node)
-            row,col = find_blank(initial_node.state)
-            pos_moves = find_directions(row,col)
-            print(pos_moves)
-            children = expand_node(initial_node,pos_moves)
-            for child in children:
-                print(child)
-            final_node = uniform_cost(initial_node.state,0)
-            print(f"This is the initial node {initial_node}")
-            print(f"This is the final node {final_node}")
+            initial_node = make_node(basic_puzzle)
+            # initial_node = make_node(example_puzzle_1)
+            print(f"Initial State is: {initial_node.state}")
+            print(f"Goal State is: {eight_puzzle_goal_state}")
+            print(f"Misplaced Tiles: {misplaced_tiles(initial_node.state, eight_puzzle_goal_state)}")
+            # row,col = find_blank(initial_node.state)
+            # pos_moves = find_directions(row,col)
+            # print(pos_moves)
+            # children = expand_node(initial_node,pos_moves)
+            # for child in children:
+            #     print(child)
+            # final_node = uniform_cost(initial_node.state,0)
+            # print(f"This is the initial node {initial_node}")
+            # print(f"This is the final node {final_node}")
         elif select_puzzle == '2': # User-Written Initial State
             custom_puzzle = create_puzzle()
             valid_input = True
