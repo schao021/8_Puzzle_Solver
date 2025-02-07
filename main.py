@@ -136,6 +136,8 @@ def misplaced_tiles(initial_state, goal_state):
             goal_tile = goal_state[i][j]
             if initial_tile != goal_tile:
                 count += 1
+    if count > 1:
+        count -= 1
     return count
 
 def main():
