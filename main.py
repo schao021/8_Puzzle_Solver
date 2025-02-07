@@ -24,7 +24,7 @@ def find_blank(state):
             if state[row][col] == 0:
                 return row,col
     print("Error, no blank space found")
-    return -1
+    return -1, -1
 
 # Use the find blank to find the position where I can move left, right down up
 def find_directions(row,col):
@@ -38,6 +38,15 @@ def find_directions(row,col):
     if col > 0:
         possible_moves.append("left")
     return possible_moves # list out all the possible moves so i can expand the nodes later
+
+def find_location(goal_char, state):
+    for row in range(dimension):
+        for col in range(dimension):
+            if state[row][col] == goal_char: # Compare base on row and col whether it match goal
+                return row,col
+    print("Error, char not found")
+    return -1, -1
+
 
 def expand_node(node, possible_moves): # expand base on the direction, possible moves is list and state is the current, so we will make children, # change to node to access cost
     children = []
@@ -62,9 +71,17 @@ basic_puzzle = [[1,2,3],
                 [4,5,0],
                 [7,8,6]] # should be able to move 6 up 1 and get the answer
 
+test_puzzle2 = [[7,2,4],
+                [5,0,6],
+                [8,3,1]]
+
 example_puzzle_1 = [[4,1,2],
                     [5,3,0],
                     [7,8,6]]
+
+example_puzzle_2 = [[0,1,2],
+                    [3,4,5],
+                    [6,7,8]]
 
 eight_puzzle_goal_state = [[1,2,3],
                            [4,5,6],
@@ -130,15 +147,28 @@ def uniform_cost(puzzle,hueristic): # puzzle is the given problem?
 
 def misplaced_tiles(initial_state, goal_state):
     count = 0
-    for i in range(dimension):
-        for j in range(dimension):
-            initial_tile = initial_state[i][j]
-            goal_tile = goal_state[i][j]
+    for row in range(dimension):
+        for col in range(dimension): # Loop through and check if initial and goal state are the same, if different add 1
+            initial_tile = initial_state[row][col]
+            goal_tile = goal_state[row][col]
             if initial_tile != goal_tile:
                 count += 1
-    if count > 1:
+    if count > 1: # This is to account for blank space, because we don't count it as a tile
         count -= 1
     return count
+
+def manhatten(initial_state, goal_state):
+    cost = 0 # Hold total cost
+    for row in range(dimension):
+        for col in range(dimension):
+            current_tile = initial_state[row][col]
+            if current_tile != 0: # If it isn't a blank space, because blank space doesn't move
+                goal_row, goal_col = find_location(current_tile, goal_state)
+                row_dif = abs(row - goal_row)
+                col_dif = abs(col - goal_col)
+                cost += row_dif + col_dif # Find the row and column difference and add it up
+                print(row_dif+col_dif)
+    return cost
 
 def main():
     valid_input = False # while loop continues to ask user until correct input
@@ -147,11 +177,12 @@ def main():
         if select_puzzle == '1': # Hard Coded initial State
             # print(basic_puzzle)
             valid_input = True
-            initial_node = make_node(basic_puzzle)
+            initial_node = make_node(test_puzzle2)
             # initial_node = make_node(example_puzzle_1)
             print(f"Initial State is: {initial_node.state}")
             print(f"Goal State is: {eight_puzzle_goal_state}")
-            print(f"Misplaced Tiles: {misplaced_tiles(initial_node.state, eight_puzzle_goal_state)}")
+            # print(f"Misplaced Tiles: {misplaced_tiles(initial_node.state, eight_puzzle_goal_state)}")
+            print(f"Manhatten Total: {manhatten(initial_node.state, example_puzzle_2)}")
             # row,col = find_blank(initial_node.state)
             # pos_moves = find_directions(row,col)
             # print(pos_moves)
