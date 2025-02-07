@@ -123,10 +123,17 @@ def create_puzzle(): # Used to make custom puzzle
 # 5. Quering function to insert expanded node back into queue.
 
 # Uniform Cost Search
-def uniform_cost(puzzle,hueristic): # puzzle is the given problem?
+def generic_search(puzzle, goal_state, hueristic): # puzzle is the given problem?
     initial_node = make_node(puzzle, None, 0) # root node where the puzzle begin
     priority_queue = []
-    heapq.heappush(priority_queue, (initial_node.cost, initial_node))
+    if hueristic == 1: # Uniform
+        heapq.heappush(priority_queue, (initial_node.cost, initial_node))
+    elif hueristic == 2: # A* with Displaced Tiles
+        heapq.heappush(priority_queue, ((initial_node.cost + misplaced_tiles(initial_node.state, goal_state)), initial_node))
+    elif hueristic == 3: # A* with Manhatten 
+        heapq.heappush(priority_queue, ((initial_node.cost + manhatten(initial_node.state, goal_state)), initial_node))
+    else:
+        return "Failure, incorrect heuristic option. Must be 1, 2 or 3"
     visited = set() # I use this to store the visted so that I dont have repeat
     while priority_queue:
         prio_value, cur_node = heapq.heappop(priority_queue) # Pop the node with lowest cost
@@ -189,7 +196,8 @@ def main():
             # children = expand_node(initial_node,pos_moves)
             # for child in children:
             #     print(child)
-            # final_node = uniform_cost(initial_node.state,0)
+            final_node = generic_search(initial_node.state, example_puzzle_2, 3)
+            print(final_node)
             # print(f"This is the initial node {initial_node}")
             # print(f"This is the final node {final_node}")
         elif select_puzzle == '2': # User-Written Initial State
