@@ -1,3 +1,5 @@
+import heapq # this is for priority queue
+
 dimension = 3 # We can just change this to adjust from 3x3 to like a 4x4
 
 class Node:
@@ -5,6 +7,10 @@ class Node:
         self.state = state # current list
         self.parent = parent # can be used for backtracking if i need
         self.cost = cost  # cost to reach node g(n)
+
+    def __lt__(self, other):
+        return self.cost < other.cost # Use this for comparison of node to determine the cost of nodes
+
     def __str__(self):
         return f"State: {self.state}, Cost: {self.cost}"
 
@@ -56,6 +62,10 @@ basic_puzzle = [[1,2,3],
                 [4,5,0],
                 [7,8,6]] # should be able to move 6 up 1 and get the answer
 
+example_puzzle_1 = [[4,1,2],
+                    [5,3,0],
+                    [7,8,6]]
+
 eight_puzzle_goal_state = [[1,2,3],
                            [4,5,6],
                            [7,8,0]]
@@ -95,7 +105,28 @@ def create_puzzle(): # Used to make custom puzzle
 # 4. expand the children of the current node base on the actions(Left, right, up, down)
 # 5. Quering function to insert expanded node back into queue.
 
-# def generic_search(intiial_node,hueristic):
+# Uniform Cost Search
+def uniform_cost(puzzle,hueristic): # puzzle is the given problem?
+    initial_node = make_node(puzzle, None, 0) # root node where the puzzle begin
+    priority_queue = []
+    heapq.heappush(priority_queue, (initial_node.cost, initial_node))
+    visited = set() # I use this to store the visted so that I dont have repeat
+    while priority_queue:
+        prio_value, cur_node = heapq.heappop(priority_queue) # Pop the node with lowest cost
+        if cur_node.state == eight_puzzle_goal_state: # See if the current node we popped is true
+            return cur_node # return if the node is true
+        
+        visited.add(tuple(map(tuple, cur_node.state))) # Add the current node into visted
+        # else we expand all the children nodes and push it back into the queue
+        row, col = find_blank(cur_node.state)
+        possible_moves = find_directions(row, col)
+        children = expand_node(cur_node, possible_moves)
+        for child in children:
+            child_state_tuple = tuple(map(tuple, child.state)) # 
+            if child_state_tuple not in visited:
+                heapq.heappush(priority_queue, (child.cost, child))  # If we didn't visit it yet, push into heapq and so we don't run into it again
+                visited.add(child_state_tuple)
+    return "Failure, No Solution Found"
 
 
 def main():
@@ -105,7 +136,8 @@ def main():
         if select_puzzle == '1': # Hard Coded initial State
             # print(basic_puzzle)
             valid_input = True
-            initial_node = make_node(basic_puzzle)
+            # initial_node = make_node(basic_puzzle)
+            initial_node = make_node(example_puzzle_1)
             # print(initial_node)
             row,col = find_blank(initial_node.state)
             pos_moves = find_directions(row,col)
@@ -113,7 +145,9 @@ def main():
             children = expand_node(initial_node,pos_moves)
             for child in children:
                 print(child)
-            # generic_search(initial_node)
+            final_node = uniform_cost(initial_node.state,0)
+            print(f"This is the initial node {initial_node}")
+            print(f"This is the final node {final_node}")
         elif select_puzzle == '2': # User-Written Initial State
             custom_puzzle = create_puzzle()
             valid_input = True
