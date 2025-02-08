@@ -2,6 +2,58 @@ import heapq # this is for priority queue
 
 dimension = 3 # We can just change this to adjust from 3x3 to like a 4x4
 
+depth_0_puzzle = [[1,2,3],
+                  [4,5,6],
+                  [7,8,8]] # should be able to move 6 up 1 and get the answer
+
+depth_2_puzzle = [[1,2,3],
+                 [4,5,6],
+                 [0,7,8]]
+
+depth_4_puzzle = [[1,2,3],
+                  [5,0,6],
+                  [4,7,8]]
+
+depth_8_puzzle = [[1,3,6],
+                  [5,0,2],
+                  [4,7,8]]
+
+depth_12_puzzle = [[1,3,6],
+                   [5,0,7],
+                   [4,8,2]]
+
+depth_16_puzzle = [[1,6,7],
+                   [5,0,3],
+                   [4,8,2]]
+
+depth_20_puzzle = [[7,1,2],
+                   [4,8,5],
+                   [6,3,0]]
+
+depth_24_puzzle = [[0,7,2],
+                   [4,6,1],
+                   [3,5,8]]
+
+test_puzzle2 = [[7,2,4],
+                [5,0,6],
+                [8,3,1]]
+
+example_puzzle_1 = [[4,1,2],
+                    [5,3,0],
+                    [7,8,6]]
+
+example_puzzle_2 = [[1,5,2],
+                    [4,8,7],
+                    [6,3,0]]
+
+example_test = [[0,7,2],
+                [4,6,1],
+                [3,5,8]]
+
+eight_puzzle_goal_state = [[1,2,3], # Final Goal State
+                           [4,5,6],
+                           [7,8,0]]
+
 class Node:
     def __init__(self, state, parent=None, cost=0):
         self.state = state # current list
@@ -9,13 +61,33 @@ class Node:
         self.cost = cost  # cost to reach node g(n)
 
     def __lt__(self, other):
-        return self.cost < other.cost # Use this for comparison of node to determine the cost of nodes
+        return self.cost < other.cost # Use this for comparison of node to which node will be popped
 
     def __str__(self):
         return f"State: {self.state}, Cost: {self.cost}"
 
 def make_node(state, parent=None, cost=0):
     return Node(state, parent, cost)
+
+def expand_node(node, possible_moves): # expand base on the direction, possible moves is list and state is the current, so we will make children, # change to node to access cost
+    children = []
+    state = node.state
+    # find the blank space first
+    row,col = find_blank(state)
+    for move in possible_moves:  # iterate through and find all possible moves in list like [up, down, left, right]
+        new_state = [row[:] for row in state]
+        if move == "up" and row > 0: # all the mvoes i just swap the two
+            new_state[row][col], new_state[row - 1][col] = new_state[row - 1][col], new_state[row][col]
+        elif move == "down" and row < dimension - 1:
+            new_state[row][col], new_state[row + 1][col] = new_state[row + 1][col], new_state[row][col]
+        elif move == "left" and col > 0:
+            new_state[row][col], new_state[row][col - 1] = new_state[row][col - 1], new_state[row][col]
+        elif move == "right" and col < dimension - 1:
+            new_state[row][col], new_state[row][col + 1] = new_state[row][col + 1], new_state[row][col]
+        child_node = make_node(new_state, node, node.cost + 1) # Make a node so i can access the cost later and add 1 per iteration
+        print(child_node)
+        children.append(child_node) # append the children after swapping the two
+    return children # return the list so we have all the children
 
 # Use this to find the blank space for every iteration
 def find_blank(state):
@@ -47,52 +119,6 @@ def find_location(goal_char, state):
     print("Error, char not found")
     return -1, -1
 
-
-def expand_node(node, possible_moves): # expand base on the direction, possible moves is list and state is the current, so we will make children, # change to node to access cost
-    children = []
-    state = node.state
-    # find the blank space first
-    row,col = find_blank(state)
-    for move in possible_moves:  # iterate through and find all possible moves in list like [up, down, left, right]
-        new_state = [row[:] for row in state]
-        if move == "up" and row > 0: # all the mvoes i just swap the two
-            new_state[row][col], new_state[row - 1][col] = new_state[row - 1][col], new_state[row][col]
-        elif move == "down" and row < dimension - 1:
-            new_state[row][col], new_state[row + 1][col] = new_state[row + 1][col], new_state[row][col]
-        elif move == "left" and col > 0:
-            new_state[row][col], new_state[row][col - 1] = new_state[row][col - 1], new_state[row][col]
-        elif move == "right" and col < dimension - 1:
-            new_state[row][col], new_state[row][col + 1] = new_state[row][col + 1], new_state[row][col]
-        child_node = make_node(new_state, node, node.cost + 1) # Make a node so i can access the cost later and add 1 per iteration
-        print(child_node)
-        children.append(child_node) # append the children after swapping the two
-    return children # return the list so we have all the children
-
-basic_puzzle = [[1,2,0],
-                [4,5,3],
-                [7,8,6]] # should be able to move 6 up 1 and get the answer
-
-test_puzzle2 = [[7,2,4],
-                [5,0,6],
-                [8,3,1]]
-
-example_puzzle_1 = [[4,1,2],
-                    [5,3,0],
-                    [7,8,6]]
-
-example_puzzle_2 = [[1,5,2],
-                    [4,8,7],
-                    [6,3,0]]
-
-example_test = [[0,7,2],
-                [4,6,1],
-                [3,5,8]]
-
-eight_puzzle_goal_state = [[1,2,3],
-                           [4,5,6],
-                           [7,8,0]]
-
-
 def create_puzzle(): # Used to make custom puzzle
     custom_puzzle = []
     # User will enter each number in 123 format
@@ -116,8 +142,7 @@ def print_solution_path(node):
             print(row)
         print("---")
 
-# Uniform Cost Search
-def generic_search(puzzle, goal_state, hueristic): # puzzle is the given problem?
+def generic_search(puzzle, goal_state, hueristic):
     initial_node = make_node(puzzle, None, 0) # root node where the puzzle begin
     priority_queue = []
     if hueristic == 1: # Uniform
