@@ -4,7 +4,7 @@ dimension = 3 # We can just change this to adjust from 3x3 to like a 4x4
 
 depth_0_puzzle = [[1,2,3],
                   [4,5,6],
-                  [7,8,8]] # should be able to move 6 up 1 and get the answer
+                  [7,8,0]] # should be able to move 6 up 1 and get the answer
 
 depth_2_puzzle = [[1,2,3],
                  [4,5,6],
@@ -54,6 +54,17 @@ eight_puzzle_goal_state = [[1,2,3], # Final Goal State
                            [4,5,6],
                            [7,8,0]]
 
+total_puzzle_list = []
+total_puzzle_list.append(depth_0_puzzle)
+total_puzzle_list.append(depth_2_puzzle)
+total_puzzle_list.append(depth_4_puzzle)
+total_puzzle_list.append(depth_8_puzzle)
+total_puzzle_list.append(depth_12_puzzle)
+total_puzzle_list.append(depth_16_puzzle)
+total_puzzle_list.append(depth_20_puzzle)
+total_puzzle_list.append(depth_24_puzzle)
+
+
 class Node:
     def __init__(self, state, parent=None, cost=0):
         self.state = state # current list
@@ -85,7 +96,7 @@ def expand_node(node, possible_moves): # expand base on the direction, possible 
         elif move == "right" and col < dimension - 1:
             new_state[row][col], new_state[row][col + 1] = new_state[row][col + 1], new_state[row][col]
         child_node = make_node(new_state, node, node.cost + 1) # Make a node so i can access the cost later and add 1 per iteration
-        print(child_node)
+        # print(child_node)
         children.append(child_node) # append the children after swapping the two
     return children # return the list so we have all the children
 
@@ -130,6 +141,25 @@ def create_puzzle(): # Used to make custom puzzle
     custom_puzzle.append(row_3_puzzle)
     return custom_puzzle
 
+def select_difficulty(): # Menu system for option 1 so user can select type of puzzle
+    valid_difficulty = False
+    while valid_difficulty == False:
+        difficulty = int(input("Please select a difficulty from 1-8\n"))
+        if difficulty >= 1 and difficulty <= 8:
+            return difficulty
+        else:
+            print("Incorrect, please try again!\n")
+
+def select_algorithm(): # Menu system for selecting algorithm UCS, A*, A*
+    valid_algorithm = False
+    while valid_algorithm == False:
+        option = int(input("Please select the algorithm you wish to use: 1. Uniform Cost Search, 2. A* with Misplaced Tiles, 3. A* with Manhattan Distance\n"))
+        if option >= 1 and option <= 3:
+            return option
+        else:
+            print("Please enter a valid option!")
+
+
 def print_solution_path(node):
     path = []
     while node:
@@ -161,11 +191,11 @@ def generic_search(puzzle, goal_state, hueristic):
         prio_value, cur_node = heapq.heappop(priority_queue) # Pop the node with lowest cost
         nodes_expanded += 1 # After we pop it, that means we expanded
         if cur_node.state == goal_state: # See if the current node we popped is true
+            print_solution_path(cur_node)
             print("\nSolution Found")
             print(f"Solution Depth: {cur_node.cost}")
             print(f"Nodes Expanded: {nodes_expanded}")
             print(f"Max Queue Size: {max_queue_size}")
-            print_solution_path(cur_node)
             return cur_node # return if the node is true
         
         visited.add(tuple(map(tuple, cur_node.state))) # Add the current node into visted
@@ -207,7 +237,6 @@ def manhatten(initial_state, goal_state):
                 row_dif = abs(row - goal_row)
                 col_dif = abs(col - goal_col)
                 cost += row_dif + col_dif # Find the row and column difference and add it up
-    print(cost)
     return cost
 
 def main():
@@ -215,24 +244,12 @@ def main():
     while valid_input == False:   
         select_puzzle = input("This is Simon's CS 170 8-Puzzle, please select 1 for a basic puzzle or 2 to create your own\n")
         if select_puzzle == '1': # Hard Coded initial State
-            # print(basic_puzzle)
             valid_input = True
-            initial_node = make_node(example_test)
-            # initial_node = make_node(example_puzzle_1)
-            print(f"Initial State is: {initial_node.state}")
-            print(f"Goal State is: {eight_puzzle_goal_state}")
-            # print(f"Misplaced Tiles: {misplaced_tiles(initial_node.state, eight_puzzle_goal_state)}")
-            # print(f"Manhatten Total: {manhatten(initial_node.state, eight_puzzle_goal_state)}")
-            # row,col = find_blank(initial_node.state)
-            # pos_moves = find_directions(row,col)
-            # print(pos_moves)
-            # children = expand_node(initial_node,pos_moves)
-            # for child in children:
-            #     print(child)
-            final_node = generic_search(initial_node.state, eight_puzzle_goal_state, 3)
+            difficulty = select_difficulty()
+            initial_node = make_node(total_puzzle_list[difficulty-1])
+            algorithm_option = select_algorithm()
+            final_node = generic_search(initial_node.state, eight_puzzle_goal_state, algorithm_option)
             print(final_node)
-            # print(f"This is the initial node {initial_node}")
-            # print(f"This is the final node {final_node}")
         elif select_puzzle == '2': # User-Written Initial State
             custom_puzzle = create_puzzle()
             valid_input = True
