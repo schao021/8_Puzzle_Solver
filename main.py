@@ -160,17 +160,26 @@ def select_algorithm(): # Menu system for selecting algorithm UCS, A*, A*
             print("Please enter a valid option!")
 
 
-def print_solution_path(node):
+def print_solution_path(node,goal_state, heuristic):
     path = []
     while node:
-        path.append(node.state)
+        path.append(node)
         node = node.parent
     path.reverse()
     print("\nSolution Path:")
-    for state in path:
-        for row in state:
+    for step, cur_node in enumerate(path): # Updated this so that now it displays the h_n, f_n, and g_n per step
+        g_n = cur_node.cost
+        if heuristic == 1: # This doesn't need h_n
+            h_n = 0
+        elif heuristic == 2:
+            h_n = misplaced_tiles(cur_node.state, goal_state)
+        elif heuristic == 3:
+            h_n = manhatten(cur_node.state, goal_state)
+        f_n = g_n + h_n
+
+        print(f"\nStep {step}: g(n) = {g_n}, h(n) = {h_n}, f(n) = {f_n}")
+        for row in cur_node.state:
             print(row)
-        print("---")
 
 def generic_search(puzzle, goal_state, hueristic):
     initial_node = make_node(puzzle, None, 0) # root node where the puzzle begin
@@ -191,7 +200,7 @@ def generic_search(puzzle, goal_state, hueristic):
         prio_value, cur_node = heapq.heappop(priority_queue) # Pop the node with lowest cost
         nodes_expanded += 1 # After we pop it, that means we expanded
         if cur_node.state == goal_state: # See if the current node we popped is true
-            print_solution_path(cur_node)
+            print_solution_path(cur_node, goal_state, hueristic)
             print("\nSolution Found")
             print(f"Solution Depth: {cur_node.cost}")
             print(f"Nodes Expanded: {nodes_expanded}")
