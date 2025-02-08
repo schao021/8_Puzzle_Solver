@@ -1,4 +1,5 @@
 import heapq # this is for priority queue
+import time # this is for keeping time for report
 
 dimension = 3 # We can just change this to adjust from 3x3 to like a 4x4
 
@@ -249,6 +250,7 @@ def manhatten(initial_state, goal_state):
     return cost
 
 def main():
+    start_time = time.process_time()
     valid_input = False # while loop continues to ask user until correct input
     while valid_input == False:   
         select_puzzle = input("This is Simon's CS 170 8-Puzzle, please select 1 for a basic puzzle or 2 to create your own\n")
@@ -263,10 +265,13 @@ def main():
             custom_puzzle = create_puzzle()
             valid_input = True
             initial_node = make_node(custom_puzzle)
-            # generic_search(initial_node)
+            algorithm_option = select_algorithm()
+            final_node = generic_search(initial_node.state, eight_puzzle_goal_state, algorithm_option)
         else:
             print("Incorrect input, please select 1 or 2")
-
+        end_time = time.process_time()
+        cpu_time = end_time - start_time
+        print(f"CPU time used: {cpu_time} seconds")
 
 main()
 
