@@ -3,9 +3,11 @@ import time # this is for keeping time for report
 
 dimension = 3 # We can just change this to adjust from 3x3 to like a 4x4
 
+# All the test cases provided by Dr. Keogh
+
 depth_0_puzzle = [[1,2,3],
                   [4,5,6],
-                  [7,8,0]] # should be able to move 6 up 1 and get the answer
+                  [7,8,0]]
 
 depth_2_puzzle = [[1,2,3],
                  [4,5,6],
@@ -69,7 +71,7 @@ total_puzzle_list.append(depth_24_puzzle)
 class Node:
     def __init__(self, state, parent=None, cost=0):
         self.state = state # current list
-        self.parent = parent # can be used for backtracking if i need
+        self.parent = parent # can be used for backtracking, did not end up using this
         self.cost = cost  # cost to reach node g(n)
 
     def __lt__(self, other):
@@ -97,7 +99,6 @@ def expand_node(node, possible_moves): # expand base on the direction, possible 
         elif move == "right" and col < dimension - 1:
             new_state[row][col], new_state[row][col + 1] = new_state[row][col + 1], new_state[row][col]
         child_node = make_node(new_state, node, node.cost + 1) # Make a node so i can access the cost later and add 1 per iteration
-        # print(child_node)
         children.append(child_node) # append the children after swapping the two
     return children # return the list so we have all the children
 
@@ -161,7 +162,7 @@ def select_algorithm(): # Menu system for selecting algorithm UCS, A*, A*
             print("Please enter a valid option!")
 
 
-def print_solution_path(node,goal_state, heuristic):
+def print_solution_path(node,goal_state, heuristic): # Used to print the h_n, g_n, f_n, and the solution for trace
     path = []
     while node:
         path.append(node)
@@ -187,7 +188,7 @@ def generic_search(puzzle, goal_state, hueristic):
     priority_queue = []
     nodes_expanded = 0
     max_queue_size = 0 # Both for report
-    if initial_node.state == goal_state:
+    if initial_node.state == goal_state: # Use this to check depth 0
         print_solution_path(initial_node, goal_state, hueristic)
         print("\nSolution Found")
         print(f"Solution Depth: {initial_node.cost}")
