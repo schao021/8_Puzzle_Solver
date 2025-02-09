@@ -185,6 +185,15 @@ def print_solution_path(node,goal_state, heuristic):
 def generic_search(puzzle, goal_state, hueristic):
     initial_node = make_node(puzzle, None, 0) # root node where the puzzle begin
     priority_queue = []
+    nodes_expanded = 0
+    max_queue_size = 0 # Both for report
+    if initial_node.state == goal_state:
+        print_solution_path(initial_node, goal_state, hueristic)
+        print("\nSolution Found")
+        print(f"Solution Depth: {initial_node.cost}")
+        print(f"Nodes Expanded: {nodes_expanded}")
+        print(f"Max Queue Size: {max_queue_size}")
+        return initial_node # return if the node is true
     if hueristic == 1: # Uniform
         heapq.heappush(priority_queue, (initial_node.cost, initial_node))
     elif hueristic == 2: # A* with Displaced Tiles
@@ -194,8 +203,6 @@ def generic_search(puzzle, goal_state, hueristic):
     else:
         return "Failure, incorrect heuristic option. Must be 1, 2 or 3"
     visited = set() # I use this to store the visted so that I dont have repeat
-    nodes_expanded = 0
-    max_queue_size = 0 # Both for report
     while priority_queue:
         max_queue_size = max(max_queue_size, len(priority_queue))  # Track the max queue size
         prio_value, cur_node = heapq.heappop(priority_queue) # Pop the node with lowest cost
