@@ -9,6 +9,8 @@ This project implements a solver for the classic 8-puzzle problem using:
 - **A\* Search with Manhattan Distance Heuristic**
 
 The goal is to evaluate how different search strategies and heuristics perform on solving the 8-puzzle in terms of **solution cost**, **number of expanded nodes**, and **runtime**.
+
+
 ![Goal State](Images/goal_state.png)
 
 
